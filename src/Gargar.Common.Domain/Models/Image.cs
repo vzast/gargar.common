@@ -18,4 +18,9 @@ public class Image : Gargar.Common.Domain.Helpers.File
     }
     [MaxLength(512)]
     public string Url { get; set; } = null!;// URL to the image file
+    [MaxLength(128)]
+    public string AltText { get; set; } = null!;
+    [MaxLength(128)]
+    public string Description { get; set; } = null!;
+    public DateTime UploadedAt { get; set; }
 }

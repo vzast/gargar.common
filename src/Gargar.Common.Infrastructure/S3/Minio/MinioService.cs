@@ -14,28 +14,21 @@ namespace Gargar.Common.Infrastructure.S3.Minio;
 /// <summary>
 /// Implementation of image service using MinIO S3-compatible storage
 /// </summary>
-public class MinioService : IS3ImgService
+/// <remarks>
+/// Initializes a new instance of the <see cref="MinioService"/> class
+/// </remarks>
+/// <param name="options">S3 configuration options</param>
+/// <param name="minioClient">MinIO client instance</param>
+/// <param name="logger">Logger instance</param>
+public class MinioService(
+    IOptions<S3Options> options,
+    IMinioClient minioClient,
+    ILogger<MinioService> logger) : IS3ImgService
 {
-    private readonly S3Options _options;
-    private readonly IMinioClient _minioClient;
-    private readonly ILogger<MinioService> _logger;
+    private readonly S3Options _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    private readonly IMinioClient _minioClient = minioClient ?? throw new ArgumentNullException(nameof(minioClient));
+    private readonly ILogger<MinioService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly TimeSpan _defaultUrlExpiry = TimeSpan.FromDays(7);
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MinioService"/> class
-    /// </summary>
-    /// <param name="options">S3 configuration options</param>
-    /// <param name="minioClient">MinIO client instance</param>
-    /// <param name="logger">Logger instance</param>
-    public MinioService(
-        IOptions<S3Options> options,
-        IMinioClient minioClient,
-        ILogger<MinioService> logger)
-    {
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        _minioClient = minioClient ?? throw new ArgumentNullException(nameof(minioClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <inheritdoc/>
     public async Task<string> UploadImageAsync(byte[] imageBytes, string fileName, string contentType)
@@ -88,7 +81,7 @@ public class MinioService : IS3ImgService
         catch (ObjectNotFoundException)
         {
             _logger.LogWarning("Image {FileName} not found in bucket {BucketName}", fileName, _options.BucketName);
-            return Array.Empty<byte>();
+            return [];
         }
         catch (Exception ex)
         {

@@ -14,7 +14,7 @@ namespace Gargar.Common.Infrastructure.S3.Minio;
 /// <summary>
 /// Implementation of image service using MinIO S3-compatible storage
 /// </summary>
-public class MinioService : IImgService
+public class MinioService : IS3ImgService
 {
     private readonly S3Options _options;
     private readonly IMinioClient _minioClient;

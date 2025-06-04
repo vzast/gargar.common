@@ -31,7 +31,7 @@ public static class DependencyInjection
                 .WithSSL(false) // Adjust based on your setup
                 .Build();
         });
-        services.AddScoped<IImgService, MinioService>();
+        services.AddScoped<IS3ImgService, MinioService>();
 
         return services;
     }

@@ -1,6 +1,6 @@
 ﻿namespace Gargar.Common.Application.Interfaces
 {
-    public interface IImgService
+    public interface IS3ImgService
     {
         Task<string> UploadImageAsync(byte[] imageBytes, string fileName, string contentType);
 

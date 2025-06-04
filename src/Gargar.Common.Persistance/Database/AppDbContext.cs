@@ -1,4 +1,5 @@
 ﻿using Gargar.Common.Domain.Identity;
+using Gargar.Common.Domain.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace Gargar.Common.Persistance.Database
             // Additional model configuration can go here
         }
 
-        // Example DbSet, replace with your actual entities
-        //public DbSet<YourEntity> YourEntities { get; set; }
+        // Example DbSet
+        public DbSet<Image> Images { get; set; }
     }
 }

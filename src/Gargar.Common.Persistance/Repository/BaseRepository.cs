@@ -11,27 +11,21 @@ namespace Gargar.Common.Persistance.Repository;
 /// </summary>
 /// <typeparam name="T">The entity type</typeparam>
 /// <typeparam name="TKey">The type of the primary key</typeparam>
-public class BaseRepository<T, TKey> : IBaseRepository<T, TKey> where T : class, new()
+/// <remarks>
+/// Initializes a new instance of the <see cref="BaseRepository{T, TKey}"/> class
+/// </remarks>
+/// <param name="context">The database context</param>
+public class BaseRepository<T, TKey>(AppDbContext context) : IBaseRepository<T, TKey> where T : class, new()
 {
     /// <summary>
     /// The database context
     /// </summary>
-    protected readonly DbContext _context;
+    protected readonly DbContext _context = context ?? throw new ArgumentNullException(nameof(context));
 
     /// <summary>
     /// Gets the DbSet for the entity
     /// </summary>
-    public DbSet<T> Table { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BaseRepository{T, TKey}"/> class
-    /// </summary>
-    /// <param name="context">The database context</param>
-    public BaseRepository(AppDbContext context)
-    {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        Table = context.Set<T>();
-    }
+    public DbSet<T> Table { get; } = context.Set<T>();
 
     /// <summary>
     /// Gets all entities matching the specified predicate
@@ -167,16 +161,9 @@ public class BaseRepository<T, TKey> : IBaseRepository<T, TKey> where T : class,
     public virtual async Task<T> Update(object id, object updateData)
     {
         var entity = new T();
-        var keyProperty = _context.Model.FindEntityType(typeof(T))
+        var keyProperty = (_context.Model.FindEntityType(typeof(T))
                             ?.FindPrimaryKey()
-                            ?.Properties
-                            .FirstOrDefault();
-                            
-        if (keyProperty == null)
-        {
-            throw new InvalidOperationException($"Entity {typeof(T).Name} does not have a primary key.");
-        }
-
+                            ?.Properties[0]) ?? throw new InvalidOperationException($"Entity {typeof(T).Name} does not have a primary key.");
         var keyPropertyName = keyProperty.Name;
         var idProperty = typeof(T).GetProperty(keyPropertyName) 
             ?? throw new InvalidOperationException($"Entity {typeof(T).Name} does not have a property named {keyPropertyName}.");

@@ -8,6 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Scalar.AspNetCore" Version="2.4.8" />
   </ItemGroup>
 
@@ -16,10 +20,6 @@
     <ProjectReference Include="..\Gargar.Common.Domain\Gargar.Common.Domain.csproj" />
     <ProjectReference Include="..\Gargar.Common.Infrastructure\Gargar.Common.Infrastructure.csproj" />
     <ProjectReference Include="..\Gargar.Common.Persistance\Gargar.Common.Persistance.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

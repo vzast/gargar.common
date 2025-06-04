@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Gargar.Common.Application.Interfaces;
 
-public interface IUoWService<TEntity,Tkey,TDTO>
+public interface IUoWService<TEntity,Tkey,TDTO, TMapper> where TDTO : class where TMapper : class , IMapper<TEntity, TDTO>, new()
 {
     Task<TDTO?> GetByIdAsync(Tkey id, CancellationToken cancellationToken = default);
     Task<TDTO> AddAsync(TEntity dto, CancellationToken cancellationToken = default);

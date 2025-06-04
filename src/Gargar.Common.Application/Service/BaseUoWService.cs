@@ -21,7 +21,7 @@ namespace Gargar.Common.Application.Service;
 /// </remarks>
 /// <param name="unitOfWork">The Unit of Work instance</param>
 /// <param name="mapper">The mapper service</param>
-public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork unitOfWork) : IUoWService<TEntity, TKey, TDTO> where TMapper : class,IMapper<TEntity,TDTO>, new()
+public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork unitOfWork) : IUoWService<TEntity, TKey, TDTO, TMapper> where TMapper : class,IMapper<TEntity,TDTO>, new()
     where TEntity : class, new()
     where TDTO : class
     where TKey : IEquatable<TKey>

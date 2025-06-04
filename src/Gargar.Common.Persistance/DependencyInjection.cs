@@ -21,8 +21,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddTransient(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
-        //services.AddTransient(typeof(IEntityRepository<>), typeof(EntityRepository<>));
+        services.AddScoped(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
 
         services.AddIdentityApiEndpoints<User>(options =>
         {

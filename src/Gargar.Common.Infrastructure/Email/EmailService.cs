@@ -1,4 +1,5 @@
 ﻿using Gargar.Common.Application.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 
@@ -16,9 +17,9 @@ public class EmailService : IEmailService
     /// </summary>
     /// <param name="options">Email configuration options</param>
     /// <exception cref="ArgumentNullException">Thrown if options is null</exception>
-    public EmailService(EmailOptions options)
+    public EmailService(IOptions<EmailOptions> options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
     /// <summary>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.4.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gargar.Common.Application\Gargar.Common.Application.csproj" />
+    <ProjectReference Include="..\Gargar.Common.Domain\Gargar.Common.Domain.csproj" />
+    <ProjectReference Include="..\Gargar.Common.Infrastructure\Gargar.Common.Infrastructure.csproj" />
+    <ProjectReference Include="..\Gargar.Common.Persistance\Gargar.Common.Persistance.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+</Project>

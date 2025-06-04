@@ -1,0 +1,39 @@
+﻿using Gargar.Common.Domain.Helpers;
+using System.Linq.Expressions;
+
+namespace Gargar.Common.Domain.Repository;
+
+public interface IBaseRepository<T, TKey> where T : class
+{
+    ValueTask<T?> GetByIdAsync(TKey id);
+
+    ValueTask<T?> Get(params object?[]? keyValues);
+
+    Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
+
+    Task<PagedList<T>> GetPagedAsync(Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy,
+        int pageNumber = 1, int pageSize = 32);
+
+    ValueTask AddAsync(T entity);
+
+    Task AddRangeAsync(IEnumerable<T> req);
+
+    void UpdateAsync(T entity);
+
+    Task<T> Update(object id, object updateData);
+
+    void DeleteAsync(T entity);
+
+    Task DeleteAsync(TKey key);
+
+    Task ExecuteDeleteAsync(Expression<Func<T, bool>> predecate);
+
+    Task<bool> ExistsAsync();
+
+    Task<bool> ExistsAsync(TKey id);
+
+    Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+
+    Task SaveAsync();
+}

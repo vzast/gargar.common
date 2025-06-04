@@ -10,5 +10,5 @@ public class File
     [MaxLength(255)]
     public string Name { get; set; } = null!;
     [MaxLength(512)]
-    public string Location { get; set; } = null!;
+    public string? Location { get; set; }
 }

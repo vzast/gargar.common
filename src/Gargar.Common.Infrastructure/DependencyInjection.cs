@@ -25,9 +25,8 @@ public static class DependencyInjection
         services.AddSingleton<IMinioClient>(provider => {
             var options = provider.GetRequiredService<IOptions<S3Options>>().Value;
             return new MinioClient()
-                .WithEndpoint(options.ServiceURL)
+                .WithEndpoint(options.ServiceURL,9000)
                 .WithCredentials(options.AccessKey, options.SecretKey)
-                .WithRegion(options.Region) // Optional
                 .WithSSL(false) // Adjust based on your setup
                 .Build();
         });

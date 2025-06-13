@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Tamaz Bolkvadze",
+  "classifications": ["WebAPI"],
+  "identity": "Gargar.Common.Template",
+  "name": "Gargar Base Template",
+  "shortName": "gargarApi",
+  "sourceName": "Gargar.Common",
+  "symbols": {
+    "ProjectName": {
+      "type": "parameter",
+      "defaultValue": "local",
+      "replaces": "Common"
+    }
+  }
+}

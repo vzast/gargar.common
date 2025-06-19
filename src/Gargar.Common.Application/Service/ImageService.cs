@@ -40,6 +40,7 @@ namespace Gargar.Common.Application.Service
             IFormFile file,
             string altText = "Deffauld Alt",
             string description = "Deffauld Description",
+            bool isPublic = true,
             CancellationToken cancellationToken = default)
         {
             if (file == null || file.Length == 0)
@@ -56,24 +57,29 @@ namespace Gargar.Common.Application.Service
             byte[] imageData = memoryStream.ToArray();
 
             // Upload to storage
-            string fileName = GetUniqueFileName(file.FileName);
-            string storedFileName = await _storageService.UploadImageAsync(
+            (string PublicUrl, string FileName) = await _storageService.UploadImageAsync(
                 imageData,
-                fileName,
+                file.FileName,
                 contentType);
-
+            string imageUrl = PublicUrl;
             // Get URL
-            string imageUrl = await _storageService.GetImageUrlAsync(storedFileName);
+            if (!isPublic)
+            {
+                imageUrl = await _storageService.GetImageUrlAsync(FileName);
+
+            }
+
+
 
             // Create database record
             var image = new Image
             {
                 Id = Guid.NewGuid(),
-                Name = storedFileName,
+                Name = FileName,
                 Size = file.Length,
                 AltText = altText,
                 Description = description,
-                Url = imageUrl,
+                Url = PublicUrl,
                 UploadedAt = DateTime.UtcNow
             };
 
@@ -152,7 +158,7 @@ namespace Gargar.Common.Application.Service
                 image.Url = await _storageService.GetImageUrlAsync(image.Name);
 
                 // Update in database
-                Repository.UpdateAsync(image);
+                Repository.Update(image);
                 await _unitOfWork.CommitAsync(cancellationToken);
             }
 
@@ -197,7 +203,7 @@ namespace Gargar.Common.Application.Service
 
             // Use the base GetAllAsync method to get filtered images
             var images = await base.GetAllAsync(predicate, cancellationToken);
-            
+
             // Apply the limit and return
             return images.Take(maxResults);
         }
@@ -236,13 +242,6 @@ namespace Gargar.Common.Application.Service
         /// </summary>
         /// <param name="originalFileName">The original filename</param>
         /// <returns>A unique filename</returns>
-        private static string GetUniqueFileName(string originalFileName)
-        {
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
-            string extension = Path.GetExtension(originalFileName);
-            return $"{fileNameWithoutExtension}_{Guid.NewGuid():N}{extension}";
-        }
-
 
     }
 }

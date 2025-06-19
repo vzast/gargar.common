@@ -31,7 +31,7 @@ public class MinioService(
     private readonly TimeSpan _defaultUrlExpiry = TimeSpan.FromDays(7);
 
     /// <inheritdoc/>
-    public async Task<string> UploadImageAsync(byte[] imageBytes, string fileName, string contentType)
+    public async Task<(string PublicUrl, string FileName)> UploadImageAsync(byte[] imageBytes, string fileName, string contentType)
     {
         try
         {
@@ -50,8 +50,8 @@ public class MinioService(
                 .WithContentType(contentType));
 
             _logger.LogInformation("Successfully uploaded image {FileName}", objectName);
-
-            return objectName;
+            string publicUrl = _options.PublicUrl ?? throw new InvalidOperationException("Public URL is not configured in S3 options.");
+            return ($"{_options.PublicUrl}/{objectName}", objectName);
         }
         catch (Exception ex)
         {

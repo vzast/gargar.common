@@ -47,7 +47,7 @@ public class ImageController(IImageService imageService, ILogger<ImageController
             var imageDto = await _imageService.UploadImageAsync(
                 file, 
                 altText, 
-                description,
+                description,default,
                 cancellationToken);
             
             return CreatedAtAction(nameof(GetImage), new { id = imageDto.Id }, imageDto);

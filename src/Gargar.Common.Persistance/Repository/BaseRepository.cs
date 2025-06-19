@@ -1,10 +1,10 @@
-﻿using Distribution.Domain.Helpers;
-using Distribution.Domain.Repository;
-using Distribution.Persistance.Database;
+﻿using Gargar.Common.Domain.Helpers;
+using Gargar.Common.Domain.Repository;
+using Gargar.Common.Persistance.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Distribution.Persistance.Repository;
+namespace Gargar.Common.Persistance.Repository;
 
 /// <summary>
 /// Base repository implementation for data access operations

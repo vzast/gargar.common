@@ -27,6 +27,7 @@ public interface IImageService
         IFormFile file,
         string altText,
         string description,
+        bool isPublic = true,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -36,7 +37,7 @@ public interface IImageService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the image was deleted; otherwise, false</returns>
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Deletes an image by its filename
     /// </summary>
@@ -44,7 +45,7 @@ public interface IImageService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the image was deleted; otherwise, false</returns>
     Task<bool> DeleteImageByFileNameAsync(string fileName, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets an image by its ID
     /// </summary>
@@ -53,7 +54,7 @@ public interface IImageService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The image metadata, or null if not found</returns>
     Task<ImageDTO?> GetImageAsync(Guid id, bool refreshUrl = false, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets the URL for an image
     /// </summary>
@@ -61,7 +62,7 @@ public interface IImageService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The URL of the image, or null if not found</returns>
     Task<string?> GetImageUrlAsync(Guid id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets a paged list of images with optional filtering
     /// </summary>

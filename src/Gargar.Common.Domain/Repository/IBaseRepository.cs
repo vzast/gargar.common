@@ -1,8 +1,7 @@
-﻿using Distribution.Domain.Helpers;
-using Gargar.Common.Domain.Helpers;
+﻿using Gargar.Common.Domain.Helpers;
 using System.Linq.Expressions;
 
-namespace Distribution.Domain.Repository;
+namespace Gargar.Common.Domain.Repository;
 
 public interface IBaseRepository<T, TKey> where T : class
 {

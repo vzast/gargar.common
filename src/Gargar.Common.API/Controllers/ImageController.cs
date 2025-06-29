@@ -43,13 +43,13 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         try
         {
             _logger.LogInformation("Uploading image with filename {Filename}", file.FileName);
-            
+
             var imageDto = await _imageService.UploadImageAsync(
-                file, 
-                altText, 
-                description,default,
+                file,
+                altText,
+                description, default,
                 cancellationToken);
-            
+
             return CreatedAtAction(nameof(GetImage), new { id = imageDto.Id }, imageDto);
         }
         catch (ArgumentException ex)
@@ -82,15 +82,15 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting image with ID {Id}", id);
-        
+
         var image = await _imageService.GetImageAsync(id, refreshUrl, cancellationToken);
-        
+
         if (image == null)
         {
             _logger.LogWarning("Image with ID {Id} not found", id);
             return NotFound();
         }
-        
+
         return Ok(image);
     }
 
@@ -110,15 +110,15 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting URL for image with ID {Id}", id);
-        
+
         var url = await _imageService.GetImageUrlAsync(id, cancellationToken);
-        
+
         if (url == null)
         {
             _logger.LogWarning("Image with ID {Id} not found", id);
             return NotFound();
         }
-        
+
         return Ok(url);
     }
 
@@ -142,13 +142,13 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Getting images page {PageNumber} with size {PageSize}", pageNumber, pageSize);
-        
+
         if (pageNumber < 1)
             return BadRequest(new { error = "Page number must be greater than 0" });
-            
+
         if (pageSize < 1 || pageSize > 100)
             return BadRequest(new { error = "Page size must be between 1 and 100" });
-        
+
         var images = await _imageService.GetImagesAsync(
             pageNumber,
             pageSize,
@@ -166,10 +166,9 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         }
         catch (Exception)
         {
-
             throw;
         }
-        
+
         return Ok(images);
     }
 
@@ -189,15 +188,15 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Deleting image with ID {Id}", id);
-        
+
         var success = await _imageService.DeleteAsync(id, cancellationToken);
-        
+
         if (!success)
         {
             _logger.LogWarning("Image with ID {Id} not found for deletion", id);
             return NotFound();
         }
-        
+
         return NoContent();
     }
 
@@ -217,17 +216,17 @@ public class ImageController(IImageService imageService, ILogger<ImageController
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Deleting image with filename {Filename}", fileName);
-        
+
         try
         {
             var success = await _imageService.DeleteImageByFileNameAsync(fileName, cancellationToken);
-            
+
             if (!success)
             {
                 _logger.LogWarning("Image with filename {Filename} not found for deletion", fileName);
                 return NotFound();
             }
-            
+
             return NoContent();
         }
         catch (ArgumentException ex)

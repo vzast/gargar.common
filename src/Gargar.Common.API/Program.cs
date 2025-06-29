@@ -1,8 +1,8 @@
 using Gargar.Common.Application;
 using Gargar.Common.Infrastructure;
 using Gargar.Common.Persistance;
-using Scalar.AspNetCore;
 using Microsoft.AspNetCore.HttpOverrides;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

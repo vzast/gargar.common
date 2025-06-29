@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Gargar.Common.Application.Interfaces;
-using Gargar.Common.Infrastructure.S3;
+﻿using Gargar.Common.Application.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Minio;

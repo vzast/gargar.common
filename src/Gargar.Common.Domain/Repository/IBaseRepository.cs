@@ -6,15 +6,19 @@ namespace Gargar.Common.Domain.Repository;
 public interface IBaseRepository<T, TKey> where T : class
 {
     ValueTask<T?> GetByIdAsync(TKey id);
+
     ValueTask<T?> GetByIdAsync(TKey id, params string[] includeProperties);
 
     ValueTask<T?> Get(params object?[]? keyValues);
+
     ValueTask<T?> Get(object?[]? keyValues, params string[] includeProperties);
 
     Task<T?> Get(Expression<Func<T, bool>> predicate);
+
     Task<T?> Get(Expression<Func<T, bool>> predicate, params string[] includeProperties);
 
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
+
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>> predicate, params string[] includeProperties);
 
     Task<PagedList<T>> GetPagedAsync(
@@ -32,14 +36,24 @@ public interface IBaseRepository<T, TKey> where T : class
 
     // These methods remain unchanged
     ValueTask AddAsync(T entity);
+
     Task AddRangeAsync(IEnumerable<T> req);
+
     void Update(T entity);
+
     Task<T> Update(object id, object updateData);
+
     void DeleteAsync(T entity);
+
     Task DeleteAsync(TKey key);
+
     Task ExecuteDeleteAsync(Expression<Func<T, bool>> predecate);
+
     Task<bool> ExistsAsync();
+
     Task<bool> ExistsAsync(TKey id);
+
     Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
+
     Task SaveAsync();
 }

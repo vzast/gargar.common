@@ -5,12 +5,7 @@ using Gargar.Common.Application.Service;
 using Gargar.Common.Domain.Helpers;
 using Gargar.Common.Domain.Models;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gargar.Common.Infrastructure.S3;
 
@@ -58,10 +53,7 @@ public class ImageService(
         if (!isPublic)
         {
             imageUrl = await _storageService.GetImageUrlAsync(FileName);
-
         }
-
-
 
         // Create database record
         var image = new Image
@@ -227,12 +219,12 @@ public class ImageService(
         // Use the base class method to get paged results
         return await base.GetPagedAsync(predicate, OrderBy, pageNumber, pageSize, cancellationToken);
     }
-    static IOrderedQueryable<Image> OrderBy(IQueryable<Image> q) => q.OrderByDescending(i => i.UploadedAt);
+
+    private static IOrderedQueryable<Image> OrderBy(IQueryable<Image> q) => q.OrderByDescending(i => i.UploadedAt);
 
     /// <summary>
     /// Generates a unique filename based on the original filename
     /// </summary>
     /// <param name="originalFileName">The original filename</param>
     /// <returns>A unique filename</returns>
-
 }

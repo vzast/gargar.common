@@ -1,12 +1,6 @@
 ﻿using Gargar.Common.Application.POCO;
 using Gargar.Common.Domain.Helpers;
-using Gargar.Common.Domain.Models;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Gargar.Common.Application.Interfaces;
 

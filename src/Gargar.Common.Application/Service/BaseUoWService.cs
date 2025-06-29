@@ -1,12 +1,7 @@
 ﻿using Gargar.Common.Application.Interfaces;
 using Gargar.Common.Domain.Helpers;
 using Gargar.Common.Domain.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Gargar.Common.Application.Service;
 
@@ -21,7 +16,7 @@ namespace Gargar.Common.Application.Service;
 /// </remarks>
 /// <param name="unitOfWork">The Unit of Work instance</param>
 /// <param name="mapper">The mapper service</param>
-public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork unitOfWork) : IUoWService<TEntity, TKey, TDTO, TMapper> where TMapper : class,IMapper<TEntity,TDTO>, new()
+public abstract class BaseUoWService<TEntity, TKey, TDTO, TMapper>(IUnitOfWork unitOfWork) : IUoWService<TEntity, TKey, TDTO, TMapper> where TMapper : class, IMapper<TEntity, TDTO>, new()
     where TEntity : class, new()
     where TDTO : class
     where TKey : IEquatable<TKey>
@@ -30,7 +25,7 @@ public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork un
     /// The Unit of Work instance
     /// </summary>
     protected readonly IUnitOfWork _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-    
+
     /// <summary>
     /// The mapper service for entity-to-DTO conversions
     /// </summary>
@@ -63,10 +58,10 @@ public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork un
     public virtual async Task<bool> DeleteAsync(TKey id, CancellationToken cancellationToken = default)
     {
         var entity = await Repository.GetByIdAsync(id);
-        
+
         if (entity == null)
             return false;
-            
+
         Repository.DeleteAsync(entity);
         await _unitOfWork.CommitAsync(cancellationToken);
         return true;
@@ -81,10 +76,10 @@ public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork un
     public virtual async Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         bool anyExists = await Repository.ExistsAsync(predicate);
-        
+
         if (!anyExists)
             return false;
-            
+
         await Repository.ExecuteDeleteAsync(predicate);
         await _unitOfWork.CommitAsync(cancellationToken);
         return true;
@@ -109,7 +104,7 @@ public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork un
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>A list of entities converted to DTOs</returns>
     public virtual async Task<IEnumerable<TDTO>> GetAllAsync(
-        Expression<Func<TEntity, bool>> predicate, 
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
         var entities = await Repository.GetAllAsync(predicate);
@@ -133,9 +128,9 @@ public abstract class BaseUoWService<TEntity, TKey, TDTO,TMapper>(IUnitOfWork un
         CancellationToken cancellationToken = default)
     {
         var pagedEntities = await Repository.GetPagedAsync(predicate, orderBy, pageNumber, pageSize);
-        
+
         var dtoItems = _mapper.MapCollection(pagedEntities.Items);
-        
+
         return new PagedList<TDTO>(
             [.. dtoItems],
             pagedEntities.TotalCount,

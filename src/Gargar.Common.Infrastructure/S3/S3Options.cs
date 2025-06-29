@@ -8,6 +8,7 @@ public class S3Options
     public string Region { get; set; } = string.Empty;
     public string ServiceURL { get; set; } = string.Empty;
     public bool WithSSL { get; set; }
+
     public string? PublicUrl =>
         !string.IsNullOrEmpty(ServiceURL) ? $"{(WithSSL ? "https" : "http")}://{ServiceURL}/{BucketName}/" : null;
 }

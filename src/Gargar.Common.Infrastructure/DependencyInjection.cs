@@ -20,12 +20,12 @@ public static class DependencyInjection
 
         #endregion Email Service Configuration
 
-
         services.Configure<S3Options>(configuration.GetSection("S3Options").Bind);
-        services.AddSingleton<IMinioClient>(provider => {
+        services.AddSingleton<IMinioClient>(provider =>
+        {
             var options = provider.GetRequiredService<IOptions<S3Options>>().Value;
             return new MinioClient()
-                .WithEndpoint(options.ServiceURL,9000)
+                .WithEndpoint(options.ServiceURL, 9000)
                 .WithCredentials(options.AccessKey, options.SecretKey)
                 .WithSSL(false) // Adjust based on your setup
                 .Build();

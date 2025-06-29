@@ -16,6 +16,13 @@ namespace Gargar.Common.Persistance;
 
 public static class DependencyInjection
 {
+    public static void ApplyMigrations(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.Migrate();
+    }
+
     public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
@@ -51,6 +58,7 @@ public static class DependencyInjection
 
     public static WebApplication UseIdentityServices(this WebApplication app)
     {
+        app.ApplyMigrations();
         app.MapIdentityApi<User>();
         return app;
     }

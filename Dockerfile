@@ -41,9 +41,9 @@ COPY --from=build /app/out ./
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
 # Coolify handles HTTPS, so only expose HTTP
-ENV ASPNETCORE_URLS="http://+:80"
+ENV ASPNETCORE_URLS="http://+:8080"
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Gargar.Common.API.dll"]

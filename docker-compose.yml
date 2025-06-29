@@ -38,7 +38,7 @@ COPY --from=build /app/out ./
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
 # Environment variables
-ENV ASPNETCORE_URLS=http://+:80
+ENV ASPNETCORE_URLS=https://+:443;http://+:80
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Expose port

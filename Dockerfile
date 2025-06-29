@@ -47,6 +47,6 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Expose port
 EXPOSE 80
-
+EXPOSE 443
 # Run the application
 ENTRYPOINT ["dotnet", "Gargar.Common.API.dll"]

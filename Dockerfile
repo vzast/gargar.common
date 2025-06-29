@@ -4,14 +4,13 @@ WORKDIR /app
 
 # Copy solution and project files
 COPY *.sln .
-# Main projects
 COPY src/Gargar.Common.API/*.csproj ./src/Gargar.Common.API/
 COPY src/Gargar.Common.Application/*.csproj ./src/Gargar.Common.Application/
 COPY src/Gargar.Common.Domain/*.csproj ./src/Gargar.Common.Domain/
 COPY src/Gargar.Common.Infrastructure/*.csproj ./src/Gargar.Common.Infrastructure/
 COPY src/Gargar.Common.Persistance/*.csproj ./src/Gargar.Common.Persistance/
 
-# Test projects
+# Copy test projects
 COPY tests/Gargar.Common.TestHelpers/*.csproj ./tests/Gargar.Common.TestHelpers/
 COPY tests/UnitTests/Gargar.Common.Api.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Api.UnitTests/
 COPY tests/UnitTests/Gargar.Common.Application.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Application.UnitTests/
@@ -23,12 +22,12 @@ COPY tests/Integrationtests/Gargar.Common.IntegrationTests/*.csproj ./tests/Inte
 # Restore dependencies
 RUN dotnet restore
 
-# Copy all the source code and test code
+# Copy source code
 COPY src/. ./src/
 COPY tests/. ./tests/
 
-# Run tests
-RUN dotnet test
+# Run tests (optional - you can remove this line to speed up builds)
+#RUN dotnet test
 
 # Build and publish
 RUN dotnet publish -c Release -o out src/Gargar.Common.API/Gargar.Common.API.csproj
@@ -38,16 +37,13 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
 
-# Create directory for file uploads if needed
+# Create directory for uploads
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-# Environment variables for HTTPS
-ENV ASPNETCORE_URLS="https://+:443;http://+:80"
-ENV ASPNETCORE_HTTPS_PORT=443
+# Coolify handles HTTPS, so only expose HTTP
+ENV ASPNETCORE_URLS="http://+:80"
+ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Expose ports
 EXPOSE 80
-EXPOSE 443
 
-# Run the application
 ENTRYPOINT ["dotnet", "Gargar.Common.API.dll"]

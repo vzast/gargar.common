@@ -6,7 +6,12 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsecrets.json");
+// Add appsecrets.json only if it exists (for local development)
+if (File.Exists("appsecrets.json"))
+{
+    builder.Configuration.AddJsonFile("appsecrets.json", optional: true);
+}
+
 builder.Services.AddPersistance(builder.Configuration);
 // Add services to the container.
 builder.Services.AddAuthorization();
@@ -26,27 +31,43 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "*" };
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        if (allowedOrigins.Contains("*"))
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
     });
 });
+
+// Add health checks for Coolify
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
 app.UseForwardedHeaders();
 app.UseCors();
-app.MapOpenApi();
-app.MapScalarApiReference();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
 app.UseIdentityServices();
 app.UseHttpsRedirection();
 
@@ -54,5 +75,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Add health check endpoint for Coolify
+app.MapHealthChecks("/health");
 
 app.Run();

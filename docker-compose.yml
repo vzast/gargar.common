@@ -30,7 +30,7 @@ COPY src/. ./src/
 RUN dotnet publish -c Release -o out src/Gargar.Common.API/Gargar.Common.API.csproj
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
 

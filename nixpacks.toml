@@ -1,2 +1,0 @@
-[phases.setup]
-nixpkgs = ["dotnet-sdk_9"]

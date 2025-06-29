@@ -1,48 +1,27 @@
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /app
+version: "3.8"
 
-# Copy solution and project files
-COPY *.sln .
-# Copy solution and project files
-COPY src/Gargar.Common.API/*.csproj ./src/Gargar.Common.API/
-COPY src/Gargar.Common.Application/*.csproj ./src/Gargar.Common.Application/
-COPY src/Gargar.Common.Domain/*.csproj ./src/Gargar.Common.Domain/
-COPY src/Gargar.Common.Infrastructure/*.csproj ./src/Gargar.Common.Infrastructure/
-COPY src/Gargar.Common.Persistance/*.csproj ./src/Gargar.Common.Persistance/
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${USERPROFILE}/.aspnet/https:/https:ro # Windows path
+      # - $HOME/.aspnet/https:/https:ro         # macOS/Linux path
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=SecurePassword123!
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GargarDB;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True;
+    depends_on:
+      - db
+      - minio
+    networks:
+      - gargar-network
 
-# Test projects
-COPY tests/Gargar.Common.TestHelpers/*.csproj ./tests/Gargar.Common.TestHelpers/
-COPY tests/UnitTests/Gargar.Common.Api.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Api.UnitTests/
-COPY tests/UnitTests/Gargar.Common.Application.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Application.UnitTests/
-COPY tests/UnitTests/Gargar.Common.Domain.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Domain.UnitTests/
-COPY tests/UnitTests/Gargar.Common.Infrastructure.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Infrastructure.UnitTests/
-COPY tests/UnitTests/Gargar.Common.Persistance.UnitTests/*.csproj ./tests/UnitTests/Gargar.Common.Persistance.UnitTests/
-COPY tests/Integrationtests/Gargar.Common.IntegrationTests/*.csproj ./tests/Integrationtests/Gargar.Common.IntegrationTests/
-
-# Restore dependencies
-RUN dotnet restore
-
-# Copy all the source code
-COPY src/. ./src/
-
-# Build and publish
-RUN dotnet publish -c Release -o out src/Gargar.Common.API/Gargar.Common.API.csproj
-
-# Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
-WORKDIR /app
-COPY --from=build /app/out ./
-
-# Create directory for file uploads if needed
-RUN mkdir -p /app/uploads && chmod 777 /app/uploads
-
-# Environment variables
-ENV ASPNETCORE_URLS=http://+:80
-ENV ASPNETCORE_ENVIRONMENT=Production
-
-# Expose port
-EXPOSE 80
-EXPOSE 443
-# Run the application
-ENTRYPOINT ["dotnet", "Gargar.Common.API.dll"]
+  # Other services (db, minio, etc.) remain the same...

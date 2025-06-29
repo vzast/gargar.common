@@ -27,7 +27,7 @@ RUN dotnet restore
 COPY src/. ./src/
 COPY tests/. ./tests/
 
-# Run tests (optional, but recommended)
+# Run tests
 RUN dotnet test
 
 # Build and publish
@@ -41,12 +41,18 @@ COPY --from=build /app/out ./
 # Create directory for file uploads if needed
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-# Environment variables
-ENV ASPNETCORE_URLS=http://+:80
-ENV ASPNETCORE_ENVIRONMENT=Production
+# Create a directory for certificates
+RUN mkdir -p /https && chmod 700 /https
 
-# Expose port
+# Environment variables for HTTPS
+ENV ASPNETCORE_URLS="https://+:443;http://+:80"
+ENV ASPNETCORE_HTTPS_PORT=443
+ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password=SecurePassword123!
+
+# Expose ports
 EXPOSE 80
 EXPOSE 443
+
 # Run the application
 ENTRYPOINT ["dotnet", "Gargar.Common.API.dll"]

@@ -2,6 +2,7 @@ using Gargar.Common.Application;
 using Gargar.Common.Infrastructure;
 using Gargar.Common.Persistance;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,13 @@ builder.Services.AddOpenApi();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddApplication();
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 
@@ -36,11 +44,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseForwardedHeaders();
 app.UseCors();
 app.MapOpenApi();
 app.MapScalarApiReference();
 app.UseIdentityServices();
-
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

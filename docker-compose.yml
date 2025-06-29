@@ -5,23 +5,45 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "5000:80"
-      - "5001:443"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${USERPROFILE}/.aspnet/https:/https:ro # Windows path
-      # - $HOME/.aspnet/https:/https:ro         # macOS/Linux path
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=SecurePassword123!
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - ConnectionStrings__DefaultConnection=Server=db;Database=GargarDB;User Id=sa;Password=YourStrong!Password;TrustServerCertificate=True;
+      - ASPNETCORE_URLS=http://+:80
+    expose:
+      - "80"
+    networks:
+      - gargar-network
+    volumes:
+      - app_uploads:/app/uploads
+      # Mount your appsecrets.json to the container
+      - ./src/Gargar.Common.API/appsecrets.json:/app/appsecrets.json:ro
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
     depends_on:
-      - db
-      - minio
+      - api
+    networks:
+      - gargar-network
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - gargar-network
 
-  # Other services (db, minio, etc.) remain the same...
+networks:
+  gargar-network:
+    driver: bridge
+
+volumes:
+  app_uploads:

@@ -41,14 +41,9 @@ COPY --from=build /app/out ./
 # Create directory for file uploads if needed
 RUN mkdir -p /app/uploads && chmod 777 /app/uploads
 
-# Create a directory for certificates
-RUN mkdir -p /https && chmod 700 /https
-
 # Environment variables for HTTPS
 ENV ASPNETCORE_URLS="https://+:443;http://+:80"
 ENV ASPNETCORE_HTTPS_PORT=443
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-ENV ASPNETCORE_Kestrel__Certificates__Default__Password=SecurePassword123!
 
 # Expose ports
 EXPOSE 80

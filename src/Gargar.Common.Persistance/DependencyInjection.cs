@@ -19,7 +19,7 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
 

@@ -1,78 +1,46 @@
 ﻿using Gargar.Common.Application.Interfaces;
-using Gargar.Common.Domain.Repository;
-using Gargar.Common.Persistance.Database;
-using Gargar.Common.Persistance.Repository;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Gargar.Common.Persistance.UoW;
 
-public class UnitOfWork(AppDbContext context) : IUnitOfWork
+public sealed class UnitOfWork(IServiceProvider serviceProvider) : IUnitOfWork, IDisposable
 {
-    private readonly AppDbContext _context = context;
-    private readonly Dictionary<string, object> _repositories = new();
-    private IDbContextTransaction? _transaction;
+    private static readonly Lock s_lock = new();
 
-    public IBaseRepository<TEntity, TKey> Repository<TEntity, TKey>() where TEntity : class, new()
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+
+    private UnitOfWorkScope? _currentScope;
+
+    public async Task ExecuteAsync(Func<IUnitOfWorkScope, CancellationToken, Task> action, CancellationToken cancellationToken = default)
     {
-        var type = typeof(TEntity).Name;
-        if (_repositories.TryGetValue(type, out var repo))
-            return (IBaseRepository<TEntity, TKey>)repo;
-
-        var repositoryInstance = new BaseRepository<TEntity, TKey>(_context);
-        _repositories.Add(type, repositoryInstance);
-        return repositoryInstance;
-    }
-
-    public async Task BeginTransactionAsync()
-    {
-        if (_transaction != null)
-            return;
-
-        _transaction = await _context.Database.BeginTransactionAsync();
-    }
-
-    public async Task CommitTransactionAsync()
-    {
+        var scope = await CreateScopeAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            await _context.SaveChangesAsync();
-            await _transaction?.CommitAsync()!;
-        }
-        catch
-        {
-            await RollbackTransactionAsync();
-            throw;
+            await action(scope, cancellationToken).ConfigureAwait(false);
+            await scope.CompleteAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            await DisposeTransactionAsync();
+            scope.Dispose();
         }
     }
 
-    public async Task RollbackTransactionAsync()
+    public async Task<IUnitOfWorkScope> CreateScopeAsync(CancellationToken cancellationToken = default)
     {
-        if (_transaction != null)
+        lock (s_lock)
         {
-            await _transaction.RollbackAsync();
-            await DisposeTransactionAsync();
+            if (_currentScope == null || _currentScope.IsCompleted)
+            {
+                _currentScope = new UnitOfWorkScope(_serviceProvider);
+            }
         }
+
+        await _currentScope.BeginAsync(cancellationToken).ConfigureAwait(false);
+
+        return _currentScope;
     }
 
-    private async Task DisposeTransactionAsync()
+    public void Dispose()
     {
-        if (_transaction != null)
-        {
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
-    }
-
-    public Task<int> CommitAsync(CancellationToken cancellationToken = default)
-        => _context.SaveChangesAsync(cancellationToken);
-
-    public async ValueTask DisposeAsync()
-    {
-        await DisposeTransactionAsync();
-        await _context.DisposeAsync();
+        _currentScope?.Dispose();
     }
 }

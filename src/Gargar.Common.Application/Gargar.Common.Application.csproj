@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Gargar.Common.Domain\Gargar.Common.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Service\" />
+  </ItemGroup>
+
 </Project>

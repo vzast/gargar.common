@@ -1,8 +1,7 @@
 ﻿using Gargar.Common.Application.Interfaces;
 using Gargar.Common.Domain.Identity;
-using Gargar.Common.Domain.Repository;
 using Gargar.Common.Persistance.Database;
-using Gargar.Common.Persistance.Repository;
+using Gargar.Common.Persistance.Extentions;
 using Gargar.Common.Persistance.UoW;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -25,10 +24,9 @@ public static class DependencyInjection
 
     public static IServiceCollection AddPersistance(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-
-        services.AddScoped(typeof(IBaseRepository<,>), typeof(BaseRepository<,>));
+        services.AddEfCoreDbContext<AppDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+        );
 
         services.AddIdentityApiEndpoints<User>(options =>
         {

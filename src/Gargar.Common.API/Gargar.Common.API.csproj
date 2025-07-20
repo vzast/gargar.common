@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Gargar.Common.Persistance\Gargar.Common.Persistance.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
 </Project>

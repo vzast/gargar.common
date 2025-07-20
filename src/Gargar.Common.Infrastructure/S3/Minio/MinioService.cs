@@ -1,4 +1,5 @@
 ﻿using Gargar.Common.Application.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Minio;
@@ -16,10 +17,11 @@ namespace Gargar.Common.Infrastructure.S3.Minio;
 /// <param name="options">S3 configuration options</param>
 /// <param name="minioClient">MinIO client instance</param>
 /// <param name="logger">Logger instance</param>
+
 public class MinioService(
     IOptions<S3Options> options,
     IMinioClient minioClient,
-    ILogger<MinioService> logger) : IS3ImgService
+    ILogger<MinioService> logger) : IS3Service
 {
     private readonly S3Options _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     private readonly IMinioClient _minioClient = minioClient ?? throw new ArgumentNullException(nameof(minioClient));
@@ -27,27 +29,14 @@ public class MinioService(
     private readonly TimeSpan _defaultUrlExpiry = TimeSpan.FromDays(7);
 
     /// <inheritdoc/>
-    public async Task<(string PublicUrl, string FileName)> UploadImageAsync(byte[] imageBytes, string fileName, string contentType)
+    public async Task<(string Url, string FileName)> UploadAsync(byte[] imageBytes, string fileName, string contentType)
     {
         try
         {
             await EnsureBucketExistsAsync();
-
-            string objectName = GenerateUniqueFileName(fileName);
             using var stream = new MemoryStream(imageBytes);
 
-            _logger.LogInformation("Uploading image {FileName} to bucket {BucketName}", objectName, _options.BucketName);
-
-            await _minioClient.PutObjectAsync(new PutObjectArgs()
-                .WithBucket(_options.BucketName)
-                .WithObject(objectName)
-                .WithStreamData(stream)
-                .WithObjectSize(stream.Length)
-                .WithContentType(contentType));
-
-            _logger.LogInformation("Successfully uploaded image {FileName}", objectName);
-            string publicUrl = _options.PublicUrl ?? throw new InvalidOperationException("Public URL is not configured in S3 options.");
-            return ($"{_options.PublicUrl}/{objectName}", objectName);
+            return await UploadAsync(stream, fileName, contentType);
         }
         catch (Exception ex)
         {
@@ -56,8 +45,61 @@ public class MinioService(
         }
     }
 
+    public async Task<(string Url, string FileName)> UploadImageAsync(IFormFile file, string fileName, string contentType)
+    {
+        try
+        {
+            await EnsureBucketExistsAsync();
+
+            using var stream = file.OpenReadStream();
+            return await UploadAsync(stream, fileName, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading image {FileName}", fileName);
+            throw;
+        }
+    }
+
+    public async Task<(string Url, string FileName)> UploadImageAsync(IFormFile file)
+    {
+        string fielName = file.FileName.ToLowerInvariant();
+
+        try
+        {
+            await EnsureBucketExistsAsync();
+            string contentType = file.ContentType.ToLowerInvariant();
+
+            using var stream = file.OpenReadStream();
+            return await UploadAsync(stream, GenerateUniqueFileName(fielName), contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading image {FileName}", fielName);
+            throw;
+        }
+    }
+
+    public async Task<(string Url, string FileName)> UploadAsync(Stream stream, string fileName, string contentType)
+    {
+        Console.WriteLine(fileName);
+        Console.WriteLine(contentType);
+        Console.WriteLine(_options.BucketName);
+
+        _logger.LogInformation("Uploading image {FileName} to bucket {BucketName}", fileName, _options.BucketName);
+        await _minioClient.PutObjectAsync(new PutObjectArgs()
+               .WithBucket(_options.BucketName)
+               .WithObject(fileName)
+               .WithStreamData(stream)
+               .WithObjectSize(stream.Length)
+               .WithContentType(contentType));
+
+        _logger.LogInformation("Successfully uploaded image {FileName}", fileName);
+        return ($"{_options.PublicUrl}/{fileName}", fileName);
+    }
+
     /// <inheritdoc/>
-    public async Task<byte[]> DownloadImageAsync(string fileName)
+    public async Task<byte[]> DownloadAsync(string fileName)
     {
         try
         {
@@ -87,7 +129,7 @@ public class MinioService(
     }
 
     /// <inheritdoc/>
-    public async Task DeleteImageAsync(string fileName)
+    public async Task DeleteAsync(string fileName)
     {
         try
         {
@@ -107,7 +149,7 @@ public class MinioService(
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ImageExistsAsync(string fileName)
+    public async Task<bool> ExistsAsync(string fileName)
     {
         try
         {
@@ -131,7 +173,7 @@ public class MinioService(
     }
 
     /// <inheritdoc/>
-    public Task<string> GetImageUrlAsync(string fileName)
+    public Task<string> GetUrlAsync(string fileName)
     {
         // Use default expiry time (7 days)
         return GetPresignedUrlAsync(fileName, _defaultUrlExpiry);

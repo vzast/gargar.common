@@ -2,15 +2,20 @@
 
 namespace Gargar.Common.Application.Interfaces;
 
-public interface IUnitOfWork : IAsyncDisposable
+public interface IUnitOfWork
 {
-    IBaseRepository<TEntity, TKey> Repository<TEntity, TKey>() where TEntity : class, new();
+    Task<IUnitOfWorkScope> CreateScopeAsync(CancellationToken cancellationToken = default);
 
-    Task<int> CommitAsync(CancellationToken cancellationToken = default);
+    Task ExecuteAsync(Func<IUnitOfWorkScope, CancellationToken, Task> action, CancellationToken cancellationToken = default);
+}
 
-    Task BeginTransactionAsync();
+public interface IUnitOfWorkScope : IDisposable
+{
+    [Obsolete(message: "Use dependency injection to resolve repositories")]
+    IRepository<TEntity> GetRepository<TEntity>() where TEntity : class;
 
-    Task CommitTransactionAsync();
+    [Obsolete(message: "Use dependency injection to resolve services")]
+    TService GetService<TService>() where TService : class;
 
-    Task RollbackTransactionAsync();
+    Task CompleteAsync(CancellationToken cancellationToken = default);
 }
